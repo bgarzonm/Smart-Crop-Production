@@ -5,7 +5,7 @@ from cycler import cycler
 colors = cycler(color=plt.get_cmap("tab10").colors)  # ["b", "r", "g"]
 
 mpl.style.use("ggplot")
-mpl.rcParams["figure.figsize"] = (20, 5)
+mpl.rcParams["figure.figsize"] = (15, 10)
 mpl.rcParams["axes.facecolor"] = "white"
 mpl.rcParams["axes.grid"] = True
 mpl.rcParams["grid.color"] = "lightgray"
