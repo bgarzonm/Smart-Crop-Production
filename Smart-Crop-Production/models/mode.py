@@ -8,12 +8,16 @@ from sklearn.model_selection import train_test_split
 from sklearn import model_selection
 from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.ensemble import BaggingClassifier
+from sklearn.svm import SVR
 
 sys.path.append("..")
 import utility.plot_settings
@@ -180,32 +184,13 @@ def fill_na_values(df):
 # Assuming your DataFrame is named 'df'
 df = fill_na_values(df)
 
-
+df.info()
 # Select features for modelfrom sklearn.model_selection import train_test_split
 
+def create_ph_model(df):
 
-def create_irrigation_model(df, irrigation_type):
-    features = [
-        "pH",
-        "P",
-        "S",
-        "Ca",
-        "Mg",
-        "K",
-        "Na",
-        "Topography_Moderadamente ondulado",
-        "Topography_Ondulado",
-        "Topography_Pendiente",
-        "Topography_Pendiente leve",
-        "Topography_Plano",
-        "Drainage_Buen drenaje",
-        "Drainage_Bueno",
-        "Drainage_No indica",
-        "Drainage_Regular",
-    ]
-
-    X = df[features]
-    y = df[irrigation_type]
+    X = df.drop("pH", axis=1)
+    y = df["pH"]
 
     # Create training and testing datasets
     X_train, X_test, y_train, y_test = train_test_split(
@@ -214,22 +199,22 @@ def create_irrigation_model(df, irrigation_type):
 
     models = {
         "decision tree": {
-            "model": DecisionTreeClassifier(criterion="gini"),
-            "params": {"decisiontreeclassifier__splitter": ["best", "random"]},
+            "model": DecisionTreeRegressor(),
+            "params": {"decisiontreeregressor__splitter": ["best", "random"]},
         },
         "svm": {
-            "model": SVC(gamma="auto", probability=True),
-            "params": {"svc__C": [1, 10, 100, 1000], "svc__kernel": ["rbf", "linear"]},
+            "model": SVR(gamma="auto"),
+            "params": {"svr__C": [1, 10, 100, 1000], "svr__kernel": ["rbf", "linear"]},
         },
         "random_forest": {
-            "model": RandomForestClassifier(),
-            "params": {"randomforestclassifier__n_estimators": [1, 5, 10]},
+            "model": RandomForestRegressor(),
+            "params": {"randomforestregressor__n_estimators": [1, 5, 10]},
         },
-        "k classifier": {
-            "model": KNeighborsClassifier(),
+        "k regressor": {
+            "model": KNeighborsRegressor(),
             "params": {
-                "kneighborsclassifier__n_neighbors": [5, 10, 20, 25],
-                "kneighborsclassifier__weights": ["uniform", "distance"],
+                "kneighborsregressor__n_neighbors": [5, 10, 20, 25],
+                "kneighborsregressor__weights": ["uniform", "distance"],
             },
         },
     }
@@ -253,8 +238,5 @@ def create_irrigation_model(df, irrigation_type):
 
     return pd.DataFrame(score)
 
+create_ph_model(df)
 
-create_irrigation_model(df, "Irrigation_Goteo")
-create_irrigation_model(df, "Irrigation_Gravedad")
-create_irrigation_model(df, "Irrigation_No cuenta con riego")
-create_irrigation_model(df, "Irrigation_No indica")
