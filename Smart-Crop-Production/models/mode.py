@@ -188,70 +188,69 @@ df.info()
 # Select features for modelfrom sklearn.model_selection import train_test_split
 
 def create_ph_model(df):
+    try:
+        X = df.drop("pH", axis=1)
+        y = df["pH"]
 
-    X = df.drop("pH", axis=1)
-    y = df["pH"]
-
-    # Create training and testing datasets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    models = {
-        "decision tree": {
-            "model": DecisionTreeRegressor(),
-            "params": {"decisiontreeregressor__splitter": ["best", "random"]},
-        },
-        "svm": {
-            "model": SVR(gamma="auto"),
-            "params": {"svr__C": [1, 10, 100, 1000], "svr__kernel": ["rbf", "linear"]},
-        },
-        "random_forest": {
-            "model": RandomForestRegressor(),
-            "params": {"randomforestregressor__n_estimators": [1, 5, 10]},
-        },
-        "k regressor": {
-            "model": KNeighborsRegressor(),
-            "params": {
-                "kneighborsregressor__n_neighbors": [5, 10, 20, 25],
-                "kneighborsregressor__weights": ["uniform", "distance"],
-            },
-        },
-    }
-
-    score = []
-    details = []
-    best_param = {}
-    for mdl, par in models.items():
-        pipe = make_pipeline(preprocessing.StandardScaler(), par["model"])
-        res = model_selection.GridSearchCV(pipe, par["params"], cv=5)
-        res.fit(X_train, y_train)
-        score.append(
-            {
-                "Model name": mdl,
-                "Best score": res.best_score_,
-                "Best param": res.best_params_,
-            }
+        # Create training and testing datasets
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
         )
-        details.append(pd.DataFrame(res.cv_results_))
-        best_param[mdl] = res.best_estimator_
 
-    score = pd.DataFrame(score)
-    score = score.sort_values(by="Best score", ascending=False)
-    best_model = best_param[score["Model name"].iloc[0]]
-    best_model.fit(X_train, y_train)
-    y_pred = best_model.predict(X_test)
-    print("Accuracy score: ", metrics.accuracy_score(y_test, y_pred))
-    print("Confusion matrix:")
-    print(metrics.confusion_matrix(y_test, y_pred))
-    print("Classification report:")
-    print(metrics.classification_report(y_test, y_pred))
-    print("ROC_AUC score: ", metrics.roc_auc_score(y_test, y_pred))
+        models = {
+            "decision tree": {
+                "model": DecisionTreeRegressor(),
+                "params": {"decisiontreeregressor__splitter": ["best", "random"]},
+            },
+            "svm": {
+                "model": SVR(gamma="auto"),
+                "params": {"svr__C": [1, 10, 100, 1000], "svr__kernel": ["rbf", "linear"]},
+            },
+            "random_forest": {
+                "model": RandomForestRegressor(),
+                "params": {"randomforestregressor__n_estimators": [1, 5, 10]},
+            },
+            "k regressor": {
+                "model": KNeighborsRegressor(),
+                "params": {
+                    "kneighborsregressor__n_neighbors": [5, 10, 20, 25],
+                    "kneighborsregressor__weights": ["uniform", "distance"],
+                },
+            },
+        }
 
-    return pd.DataFrame(score)
+        score = []
+        details = []
+        best_param = {}
+        for mdl, par in models.items():
+            pipe = make_pipeline(preprocessing.StandardScaler(), par["model"])
+            res = model_selection.GridSearchCV(pipe, par["params"], cv=5)
+            res.fit(X_train, y_train)
+            score.append(
+                {
+                    "Model name": mdl,
+                    "Best score": res.best_score_,
+                    "Best param": res.best_params_,
+                }
+            )
+            details.append(pd.DataFrame(res.cv_results_))
+            best_param[mdl] = res.best_estimator_
+
+        return pd.DataFrame(score)
+    except Exception as e:
+        return "Error: {}".format(e)
+
 
 create_ph_model(df)
 
-df['pH'].plot()
+def plot_with_preds(df):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    df['pH'].plot(ax=ax, label='Actual pH')
+    ax.legend()
+    ax.set_xlabel('Index')
+    ax.set_ylabel('pH')
+    
+plot_with_preds(df)
 
 df['pH'].describe()
+
