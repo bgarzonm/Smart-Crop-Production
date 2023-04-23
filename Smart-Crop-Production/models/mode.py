@@ -236,7 +236,22 @@ def create_ph_model(df):
         details.append(pd.DataFrame(res.cv_results_))
         best_param[mdl] = res.best_estimator_
 
+    score = pd.DataFrame(score)
+    score = score.sort_values(by="Best score", ascending=False)
+    best_model = best_param[score["Model name"].iloc[0]]
+    best_model.fit(X_train, y_train)
+    y_pred = best_model.predict(X_test)
+    print("Accuracy score: ", metrics.accuracy_score(y_test, y_pred))
+    print("Confusion matrix:")
+    print(metrics.confusion_matrix(y_test, y_pred))
+    print("Classification report:")
+    print(metrics.classification_report(y_test, y_pred))
+    print("ROC_AUC score: ", metrics.roc_auc_score(y_test, y_pred))
+
     return pd.DataFrame(score)
 
 create_ph_model(df)
 
+df['pH'].plot()
+
+df['pH'].describe()
