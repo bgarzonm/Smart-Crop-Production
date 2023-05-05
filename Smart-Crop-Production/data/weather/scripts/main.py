@@ -23,6 +23,14 @@ for i in dfList:
     dfNewList.append(temp)
 oldColumns={'Value(°C)':'Centigrade'}
 dfNewList[0]=dfNewList[0].rename(columns=oldColumns)
-#print(dfNewList)
-final_DF=pd.concat([dfNewList[0].set_index('Date'), dfNewList[1].set_index('Date'), dfNewList[2].set_index('Date')], axis=1)
-print(final_DF)#The last and not least dataframe, customized
+print(dfNewList[1].columns)
+final_DF=pd.merge(dfNewList[0],dfNewList[1],on='Date')
+final_DF=pd.merge(final_DF,dfNewList[2],on='Date')
+print(final_DF.columns)#The last and not least dataframe, customized
+# Especificamos la ruta y el nombre del archivo CSV
+archivo_csv = 'data/data_NEW/finalData.csv'
+
+# Guardamos los datos del DataFrame en el archivo CSV
+final_DF.to_csv(archivo_csv, index=False)
+
+print("Archivo CSV creado correctamente.")
